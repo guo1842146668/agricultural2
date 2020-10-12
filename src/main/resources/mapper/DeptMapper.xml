@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.agricultural2.mapper.DeptMapper">
+    <insert id="insertDeptMenu">
+        insert  into  dept_menu(dept_id,menu_id) value (#{deptId},#{menuId})
+    </insert>
+    <delete id="deleteByDeptId">
+        delete  from dept_menu where dept_id = #{deptId}
+    </delete>
+
+    <select id="getListUser" resultType="com.example.agricultural2.entity.Dept">
+       SELECT * from dept where  parent_id =
+       (SELECT parent_id FROM dept WHERE dept_id = #{deptId}) or
+       dept_id = (SELECT parent_id FROM dept WHERE dept_id = #{deptId}) or
+       dept_id = (SELECT parent_id FROM dept WHERE dept_id = (SELECT parent_id FROM dept WHERE dept_id = #{deptId}))
+    </select>
+    <select id="getDeptMenu" resultType="java.util.Map">
+        select  * from dept_menu where dept_id = #{deptId}
+    </select>
+
+
+</mapper>

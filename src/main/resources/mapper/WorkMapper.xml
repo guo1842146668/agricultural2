@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.agricultural2.mapper.WorkDao">
+
+    <select id="getAllAdmin" parameterType="com.example.agricultural2.entity.Work" resultType="map">
+        SELECT * from work w,machinery m,`user` u
+        where w.work_machinery_id=m.machinery_id and u.user_id = m.machinery_owner
+        and w.work_machinery_id in
+        (select machinery_id from machinery where machinery_owner in (SELECT user_id from `user`))
+        <if test="workId != null">
+            and work_id = #{workId}
+        </if>
+    </select>
+
+    <select id="upExcelAdmin" parameterType="com.example.agricultural2.entity.Work"  resultType="map">
+       SELECT * from work where work_machinery_id in (select machinery_id from machinery where machinery_owner in (SELECT user_id from `user`))
+    </select>
+
+    <select id="getByWorkID" parameterType="Integer" resultType="com.example.agricultural2.entity.Work">
+        select *  from agricultural_work where workStartTime &lt; (select workStartTime from agricultural_work where workID = #{workID}) ORDER BY workStartTime DESC LIMIT 1
+    </select>
+    <select id="getAllUser" resultType="java.util.Map">
+        SELECT * from work w,machinery m,`user` u
+        where w.work_machinery_id=m.machinery_id and u.user_id = m.machinery_owner
+        and w.work_machinery_id in
+        (select machinery_id from machinery where machinery_owner in (SELECT user_id from `user` where dept_id = #{deptId})))
+        <if test="workId != null">
+            and work_id = #{workId}
+        </if>
+    </select>
+    <select id="upExcelUser" resultType="java.util.Map">
+        SELECT *,(SELECT username from `user` where user_id=(SELECT machinery_owner from machinery where work_machinery_id = machinery_id)) as username
+         from work where work_machinery_id in (select machinery_id from machinery
+        <if test="machineryOwner != null">
+            where machinery_owner = #{machineryOwner}
+        </if>
+        )
+        <if test="workID != null">
+            and work_id = #{workID}
+        </if>
+
+    </select>
+
+</mapper>

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.agricultural2.mapper.MachineryDao">
+    
+    <update id="updateStatus" parameterType="map">
+        update machinery set machineryStatus=#{machineryStatus}
+        where machineryID=#{machineryID}
+    </update>
+
+
+    <select id="getListAdmin"  resultType="map">
+        SELECT *,(SELECT SUM(confirm_area) from work where machinery.machinery_id = work_machinery_id) as confirm_area,
+        (SELECT username FROM user where machinery.machinery_owner = user_id) as username,
+        (SELECT phone FROM user where machinery.machinery_owner = user_id) as phone
+        FROM machinery
+    </select>
+
+
+    <select id="getMachineryIsEmpty" parameterType="java.lang.String" resultType="map">
+        SELECT m.*,u.* from machinery m LEFT JOIN user u
+        on  m.machinery_owner=u.user_id where m.machinery_no=#{machineryNO}
+    </select>
+
+
+    <delete id="deleteMachinery" parameterType="Integer">
+        DELETE from machinery where machinery_id=#{machineryID}
+    </delete>
+    <delete id="deleteWork" parameterType="Integer">
+        DELETE from work where work_machinery_id=#{machineryID}
+    </delete>
+
+    <select id="getMachineryByID" parameterType="Integer" resultType="map">
+        select  * from machinery where machineryID = #{machineryID}
+    </select>
+    <select id="getListUser" resultType="java.util.Map">
+        select *,(SELECT SUM(confirm_area) from work where machinery.machinery_id = work_machinery_id) as confirm_area,
+        (SELECT username FROM user where machinery.machinery_owner = user_id) as username,
+        (SELECT phone FROM user where machinery.machinery_owner = user_id) as phone
+        from machinery where machinery_owner in (SELECT user_id from user where dept_id = #{deptId})
+    </select>
+    <select id="getVerificationAdmin" resultType="java.util.Map">
+        SELECT DISTINCT* from machinery
+         GROUP BY machinery_no
+    </select>
+    <select id="getVerificationUser" resultType="java.util.Map">
+        SELECT DISTINCT* from machinery where machinery_owner in (SELECT user_id from user where dept_id = #{deptId})
+         GROUP BY machinery_no
+    </select>
+</mapper>

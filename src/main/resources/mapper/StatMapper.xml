@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.agricultural2.mapper.StatDao">
+
+    <!--   主要是在主键是自增的情况下，添加成功后可以直接使用主键值，其中keyProperty的值是对象的属性值不是数据库表中的字段名-->
+
+   <select id="getAllByCounty" parameterType="HashMap" resultType="java.util.Map">
+        <if test=" checkID == 2">
+            select m.machinery_no,COUNT(machinery_id) as '农机数量',SUM(work_length) as '作业里程',SUM(work_area) as '作业面积'
+            from  work w,machinery m,user u where w.work_machinery_id=m.machinery_id
+            and u.user_id = m.machinery_owner and u.dept_id = #{deptId}
+            <if test="workStartTime != null">
+             and   w.work_start_time &gt;= #{workStartTime}
+            </if>
+            <if  test="workEndTime != null">
+             and   w.work_end_time &lt;= #{workEndTime}
+            </if>
+            GROUP BY w.work_machinery_id
+        </if>
+        <if test="checkID == 1">
+            select w.province,w.city,w.county,COUNT(w.work_machinery_id) as '农机数量',SUM(w.work_length) as '作业里程',SUM(w.work_area) as '作业面积'
+            from  work w,machinery m,user u where w.work_machinery_id=m.machinery_id
+            and u.user_id = m.machinery_owner and u.dept_id = #{deptId}
+            <if test="workStartTime != null">
+                and  w.work_start_time &gt;= #{workStartTime}
+            </if>
+            <if  test="workEndTime != null">
+                and  w.work_end_time &lt;= #{workEndTime}
+            </if>
+            GROUP BY w.county
+        </if>
+  </select>
+
+    <select id="getAllByMachineryID" resultType="java.util.Map">
+        select m.machinery_no,m.machinery_license,m.machinery_brand, COUNT(w.work_machinery_id) as '农机数量',SUM(w.work_length) as '作业里程',SUM(w.work_area) as '作业面积'
+        from  work w,machinery m,user u
+        where w.work_machinery_id=m.machinery_id and u.user_id = m.machinery_owner and u.dept_id = #{deptId}
+        GROUP BY w.work_machinery_id
+    </select>
+
+    <select id="getStatsWookNum" resultType="java.util.Map">
+        SELECT
+        (select count(*)  from machinery m,user u where u.user_id=m.machinery_owner and u.dept_id = #{deptId}) as '农机总数量',
+        (SELECT COUNT(*) from work w ,machinery m,user u
+        where w.work_machinery_id=m.machinery_id and u.user_id = m.machinery_owner and u.dept_id = #{deptId} and DATE_FORMAT(work_start_time,'%Y-%m-%d') = DATE_FORMAT(NOW(),'%Y-%m-%d')) as '今天作业数量',
+        (SELECT COUNT(*)  from work w,machinery m,user u
+        where w.work_machinery_id=m.machinery_id and u.user_id = m.machinery_owner and u.dept_id = #{deptId} and DATE_FORMAT(work_start_time,'%Y-%m-%d') = DATE_SUB(curdate(),INTERVAL 1 DAY)) as '昨日作业数量',
+
+        (SELECT SUM(work_area) from work w,machinery m,user u
+        where w.work_machinery_id=m.machinery_id and u.user_id = m.machinery_owner and u.dept_id = #{deptId}) as '作业总面积',
+        (SELECT SUM(work_area) from work w ,machinery m,user u
+        where w.work_machinery_id=m.machinery_id and u.user_id = m.machinery_owner and u.dept_id = #{deptId} and DATE_FORMAT(work_start_time,'%Y-%m-%d') = DATE_FORMAT(NOW(),'%Y-%m-%d')) as'今天作业面积',
+        (SELECT SUM(work_area)  from work w ,machinery m,user u
+        where w.work_machinery_id=m.machinery_id and u.user_id = m.machinery_owner and u.dept_id = #{deptId} and DATE_FORMAT(work_start_time,'%Y-%m-%d') = DATE_SUB(curdate(),INTERVAL 1 DAY)) as '昨日作业面积',
+        (SELECT SUM(work_length)  from work w,machinery m,user u
+        where w.work_machinery_id=m.machinery_id and u.user_id = m.machinery_owner and u.dept_id = #{deptId}) as '作业总里程',
+        (SELECT SUM(work_length)  from work w ,machinery m,user u
+        where w.work_machinery_id=m.machinery_id and u.user_id = m.machinery_owner and u.dept_id = #{deptId} and DATE_FORMAT(work_start_time,'%Y-%m-%d') = DATE_FORMAT(NOW(),'%Y-%m-%d')) as '今天作业里程',
+        (SELECT SUM(work_length)  from work w ,machinery m,user u
+        where w.work_machinery_id=m.machinery_id and u.user_id = m.machinery_owner and u.dept_id = #{deptId} and DATE_FORMAT(work_start_time,'%Y-%m-%d') = DATE_SUB(curdate(),INTERVAL 1 DAY)) as '昨日作业里程';</select>
+
+    <select id="getPastSeven" resultType="java.util.Map">
+     select
+    (SELECT SUM(work_area) from work w ,machinery m,user u
+        where w.work_machinery_id=m.machinery_id and u.user_id = m.machinery_owner and u.dept_id = #{deptId} and DATE_FORMAT(work_start_time,'%Y-%m-%d') = DATE_SUB(curdate(),INTERVAL 1 DAY)) as 'one',
+    (SELECT SUM(work_area) from work w ,machinery m,user u
+        where w.work_machinery_id=m.machinery_id and u.user_id = m.machinery_owner and u.dept_id = #{deptId} and DATE_FORMAT(work_start_time,'%Y-%m-%d') = DATE_SUB(curdate(),INTERVAL 2 DAY)) as 'two',
+    (SELECT SUM(work_area) from work w ,machinery m,user u
+        where w.work_machinery_id=m.machinery_id and u.user_id = m.machinery_owner and u.dept_id = #{deptId} and DATE_FORMAT(work_start_time,'%Y-%m-%d') = DATE_SUB(curdate(),INTERVAL 3 DAY)) as 'three',
+    (SELECT SUM(work_area) from work w ,machinery m,user u
+        where w.work_machinery_id=m.machinery_id and u.user_id = m.machinery_owner and u.dept_id = #{deptId} and DATE_FORMAT(work_start_time,'%Y-%m-%d') = DATE_SUB(curdate(),INTERVAL 4 DAY)) as 'four',
+    (SELECT SUM(work_area) from work w ,machinery m,user u
+        where w.work_machinery_id=m.machinery_id and u.user_id = m.machinery_owner and u.dept_id = #{deptId} and DATE_FORMAT(work_start_time,'%Y-%m-%d') = DATE_SUB(curdate(),INTERVAL 5 DAY)) as 'Fives',
+    (SELECT SUM(work_area) from work w ,machinery m,user u
+        where w.work_machinery_id=m.machinery_id and u.user_id = m.machinery_owner and u.dept_id = #{deptId} and DATE_FORMAT(work_start_time,'%Y-%m-%d') = DATE_SUB(curdate(),INTERVAL 6 DAY)) as 'six',
+    (SELECT SUM(work_area) from work w ,machinery m,user u
+        where w.work_machinery_id=m.machinery_id and u.user_id = m.machinery_owner and u.dept_id = #{deptId} and DATE_FORMAT(work_start_time,'%Y-%m-%d') = DATE_SUB(curdate(),INTERVAL 7 DAY)) as 'Seven';
+    </select>
+
+
+    <select id="getDecember" parameterType="String" resultType="java.util.Map">
+        <if test="time != null">
+            SELECT
+            (SELECT SUM(work_area) from work w ,machinery m,user u
+            where w.work_machinery_id=m.machinery_id and u.user_id = m.machinery_owner and u.dept_id = #{deptId} and work_start_time > (SELECT DATE_ADD(DATE_FORMAT(#{time},'%Y-%m-%d'),INTERVAL -1 MONTH)) and work_start_time &lt; (SELECT DATE_ADD(DATE_FORMAT(#{time},'%Y-%m-%d'),INTERVAL 0 MONTH))) as January,
+            (SELECT SUM(work_area) from work w ,machinery m,user u
+            where w.work_machinery_id=m.machinery_id and u.user_id = m.machinery_owner and u.dept_id = #{deptId} and work_start_time > (SELECT DATE_ADD(DATE_FORMAT(#{time},'%Y-%m-%d'),INTERVAL -2 MONTH)) and work_start_time &lt; (SELECT DATE_ADD(DATE_FORMAT(#{time},'%Y-%m-%d'),INTERVAL -1 MONTH))) as February,
+            (SELECT SUM(work_area) from work w ,machinery m,user u
+            where w.work_machinery_id=m.machinery_id and u.user_id = m.machinery_owner and u.dept_id = #{deptId} and work_start_time > (SELECT DATE_ADD(DATE_FORMAT(#{time},'%Y-%m-%d'),INTERVAL -3 MONTH)) and work_start_time &lt; (SELECT DATE_ADD(DATE_FORMAT(#{time},'%Y-%m-%d'),INTERVAL -2 MONTH))) as March,
+            (SELECT SUM(work_area) from work w ,machinery m,user u
+            where w.work_machinery_id=m.machinery_id and u.user_id = m.machinery_owner and u.dept_id = #{deptId} and work_start_time > (SELECT DATE_ADD(DATE_FORMAT(#{time},'%Y-%m-%d'),INTERVAL -4 MONTH)) and work_start_time &lt; (SELECT DATE_ADD(DATE_FORMAT(#{time},'%Y-%m-%d'),INTERVAL -3 MONTH))) as April,
+            (SELECT SUM(work_area) from work w ,machinery m,user u
+            where w.work_machinery_id=m.machinery_id and u.user_id = m.machinery_owner and u.dept_id = #{deptId} and work_start_time > (SELECT DATE_ADD(DATE_FORMAT(#{time},'%Y-%m-%d'),INTERVAL -5 MONTH)) and work_start_time &lt; (SELECT DATE_ADD(DATE_FORMAT(#{time},'%Y-%m-%d'),INTERVAL -4 MONTH))) as May,
+            (SELECT SUM(work_area) from work w ,machinery m,user u
+            where w.work_machinery_id=m.machinery_id and u.user_id = m.machinery_owner and u.dept_id = #{deptId} and work_start_time > (SELECT DATE_ADD(DATE_FORMAT(#{time},'%Y-%m-%d'),INTERVAL -6 MONTH)) and work_start_time &lt; (SELECT DATE_ADD(DATE_FORMAT(#{time},'%Y-%m-%d'),INTERVAL -5 MONTH))) as June,
+            (SELECT SUM(work_area) from work w ,machinery m,user u
+            where w.work_machinery_id=m.machinery_id and u.user_id = m.machinery_owner and u.dept_id = #{deptId} and work_start_time > (SELECT DATE_ADD(DATE_FORMAT(#{time},'%Y-%m-%d'),INTERVAL -7 MONTH)) and work_start_time &lt; (SELECT DATE_ADD(DATE_FORMAT(#{time},'%Y-%m-%d'),INTERVAL -6 MONTH))) as July,
+            (SELECT SUM(work_area) from work w ,machinery m,user u
+            where w.work_machinery_id=m.machinery_id and u.user_id = m.machinery_owner and u.dept_id = #{deptId} and work_start_time > (SELECT DATE_ADD(DATE_FORMAT(#{time},'%Y-%m-%d'),INTERVAL -8 MONTH)) and work_start_time &lt; (SELECT DATE_ADD(DATE_FORMAT(#{time},'%Y-%m-%d'),INTERVAL -7 MONTH))) as August,
+            (SELECT SUM(work_area) from work w ,machinery m,user u
+            where w.work_machinery_id=m.machinery_id and u.user_id = m.machinery_owner and u.dept_id = #{deptId} and work_start_time > (SELECT DATE_ADD(DATE_FORMAT(#{time},'%Y-%m-%d'),INTERVAL -9 MONTH)) and work_start_time &lt; (SELECT DATE_ADD(DATE_FORMAT(#{time},'%Y-%m-%d'),INTERVAL -8 MONTH))) as September,
+            (SELECT SUM(work_area) from work w ,machinery m,user u
+            where w.work_machinery_id=m.machinery_id and u.user_id = m.machinery_owner and u.dept_id = #{deptId} and work_start_time > (SELECT DATE_ADD(DATE_FORMAT(#{time},'%Y-%m-%d'),INTERVAL -10 MONTH)) and work_start_time &lt; (SELECT DATE_ADD(DATE_FORMAT(#{time},'%Y-%m-%d'),INTERVAL -9 MONTH))) as October,
+            (SELECT SUM(work_area) from work w ,machinery m,user u
+            where w.work_machinery_id=m.machinery_id and u.user_id = m.machinery_owner and u.dept_id = #{deptId} and work_start_time > (SELECT DATE_ADD(DATE_FORMAT(#{time},'%Y-%m-%d'),INTERVAL -11 MONTH)) and work_start_time &lt; (SELECT DATE_ADD(DATE_FORMAT(#{time},'%Y-%m-%d'),INTERVAL -10 MONTH))) as November,
+            (SELECT SUM(work_area) from work w ,machinery m,user u
+            where w.work_machinery_id=m.machinery_id and u.user_id = m.machinery_owner and u.dept_id = #{deptId} and work_start_time > (SELECT DATE_ADD(DATE_FORMAT(#{time},'%Y-%m-%d'),INTERVAL -12 MONTH)) and work_start_time &lt; (SELECT DATE_ADD(DATE_FORMAT(#{time},'%Y-%m-%d'),INTERVAL -11 MONTH))) as December;
+
+        </if>
+        <if test="time == null">
+            SELECT
+            (SELECT SUM(work_area) from work w ,machinery m,user u
+            where w.work_machinery_id=m.machinery_id and u.user_id = m.machinery_owner and u.dept_id = #{deptId} and work_start_time > (SELECT DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'),INTERVAL -1 MONTH)) and work_start_time &lt; (SELECT DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'),INTERVAL 0 MONTH))) as January,
+            (SELECT SUM(work_area) from work w ,machinery m,user u
+            where w.work_machinery_id=m.machinery_id and u.user_id = m.machinery_owner and u.dept_id = #{deptId} and work_start_time > (SELECT DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'),INTERVAL -2 MONTH)) and work_start_time &lt; (SELECT DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'),INTERVAL -1 MONTH))) as February,
+            (SELECT SUM(work_area) from work w ,machinery m,user u
+            where w.work_machinery_id=m.machinery_id and u.user_id = m.machinery_owner and u.dept_id = #{deptId} and work_start_time > (SELECT DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'),INTERVAL -3 MONTH)) and work_start_time &lt; (SELECT DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'),INTERVAL -2 MONTH))) as March,
+            (SELECT SUM(work_area) from work w ,machinery m,user u
+            where w.work_machinery_id=m.machinery_id and u.user_id = m.machinery_owner and u.dept_id = #{deptId} and work_start_time > (SELECT DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'),INTERVAL -4 MONTH)) and work_start_time &lt; (SELECT DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'),INTERVAL -3 MONTH))) as April,
+            (SELECT SUM(work_area) from work w ,machinery m,user u
+            where w.work_machinery_id=m.machinery_id and u.user_id = m.machinery_owner and u.dept_id = #{deptId} and work_start_time > (SELECT DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'),INTERVAL -5 MONTH)) and work_start_time &lt; (SELECT DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'),INTERVAL -4 MONTH))) as May,
+            (SELECT SUM(work_area) from work w ,machinery m,user u
+            where w.work_machinery_id=m.machinery_id and u.user_id = m.machinery_owner and u.dept_id = #{deptId} and work_start_time > (SELECT DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'),INTERVAL -6 MONTH)) and work_start_time &lt; (SELECT DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'),INTERVAL -5 MONTH))) as June,
+            (SELECT SUM(work_area) from work w ,machinery m,user u
+            where w.work_machinery_id=m.machinery_id and u.user_id = m.machinery_owner and u.dept_id = #{deptId} and work_start_time > (SELECT DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'),INTERVAL -7 MONTH)) and work_start_time &lt; (SELECT DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'),INTERVAL -6 MONTH))) as July,
+            (SELECT SUM(work_area) from work w ,machinery m,user u
+            where w.work_machinery_id=m.machinery_id and u.user_id = m.machinery_owner and u.dept_id = #{deptId} and work_start_time > (SELECT DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'),INTERVAL -8 MONTH)) and work_start_time &lt; (SELECT DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'),INTERVAL -7 MONTH))) as August,
+            (SELECT SUM(work_area) from work w ,machinery m,user u
+            where w.work_machinery_id=m.machinery_id and u.user_id = m.machinery_owner and u.dept_id = #{deptId} and work_start_time > (SELECT DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'),INTERVAL -9 MONTH)) and work_start_time &lt; (SELECT DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'),INTERVAL -8 MONTH))) as September,
+            (SELECT SUM(work_area) from work w ,machinery m,user u
+            where w.work_machinery_id=m.machinery_id and u.user_id = m.machinery_owner and u.dept_id = #{deptId} and work_start_time > (SELECT DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'),INTERVAL -10 MONTH)) and work_start_time &lt; (SELECT DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'),INTERVAL -9 MONTH))) as October,
+            (SELECT SUM(work_area) from work w ,machinery m,user u
+            where w.work_machinery_id=m.machinery_id and u.user_id = m.machinery_owner and u.dept_id = #{deptId} and work_start_time > (SELECT DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'),INTERVAL -11 MONTH)) and work_start_time &lt; (SELECT DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'),INTERVAL -10 MONTH))) as November,
+            (SELECT SUM(work_area) from work w ,machinery m,user u
+            where w.work_machinery_id=m.machinery_id and u.user_id = m.machinery_owner and u.dept_id = #{deptId} and work_start_time > (SELECT DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'),INTERVAL -12 MONTH)) and work_start_time &lt; (SELECT DATE_ADD(DATE_FORMAT(NOW(),'%Y-%m-%d'),INTERVAL -11 MONTH))) as December;</if>
+
+    </select>
+
+
+    <select id="getWorkBycounty"  resultType="map">
+        SELECT work_id,w.village,SUM(work_area) as workArea,SUM(work_length) as workLength,SUM(confirm_area) as  confirmArea
+        from work w ,machinery m,user u
+        where w.work_machinery_id=m.machinery_id and u.user_id = m.machinery_owner and  w.county = #{county} and u.dept_id = #{deptId}  GROUP BY w.village
+    </select>
+
+    <select id="getWorkByNo" parameterType="String" resultType="map">
+       SELECT
+        (SELECT machinery_owner from machinery  where machinery_id = work_machinery_id ) as userID,
+        (select username from user where user_id in (SELECT machinery_owner from machinery  where machinery_id = work_machinery_id )) as name,SUM(work_area) as workArea,SUM(work_length) as workLength,SUM(confirm_area) as confirmArea from work where work_machinery_id in
+        (SELECT machinery_id from machinery where machinery_no=#{machineryNO})  GROUP BY work_machinery_id
+    </select>
+
+    <select id="getWorkByvillage" parameterType="Integer" resultType="map">
+        SELECT *,
+        (SELECT machinery_no from machinery where machinery_id = work.work_machinery_id) as machineryNo,
+        (select username from user where user_id in (SELECT machinery_owner from machinery  where machinery_id = work_machinery_id )) as userName,
+		(select phone from user where user_id in (SELECT machinery_owner from machinery  where machinery_id = work_machinery_id )) as phone
+		from work where
+        province=(SELECT province from work where 	work_id = #{workID} ) and
+        city=(SELECT city from work where 	work_id = #{workID}) and
+        county=(SELECT county from work where 	work_id = #{workID}) and
+        town=(SELECT town from work where 	work_id = #{workID}) and
+        village=(SELECT village from work where 	work_id = #{workID})
+    </select>
+
+    <select id="getWorkByName" parameterType="Integer" resultType="map">
+        SELECT *,(SELECT machinery_no from machinery where machinery_id = work.work_machinery_id) as machineryNo,
+         (select username from user where user_id in (SELECT machinery_owner from machinery  where machinery_id = work_machinery_id )) as userName,
+		(select phone from user where user_id in (SELECT machinery_owner from machinery  where machinery_id = work_machinery_id )) as phone
+		 from work where work_machinery_id IN (SELECT machinery_id from machinery where machinery_owner = #{userID})</select>
+
+    <select id="getByCounty" resultType="java.util.Map">
+            select w.province,w.city,w.county,COUNT(work_machinery_id) as '农机数量',SUM(work_length) as '作业里程',SUM(work_area) as '作业面积'
+            from  work w ,machinery m,user u
+        where w.work_machinery_id=m.machinery_id and u.user_id = m.machinery_owner and u.dept_id = #{deptId}  GROUP BY w.county
+    </select>
+</mapper>
