@@ -38,8 +38,8 @@ public class Machinery implements Serializable {
     @ApiModelProperty(value = "农业机械车牌号")
     private String machineryLicense;
 
-    @ApiModelProperty(value = "农业机械品牌")
-    private String machineryBrand;
+    @ApiModelProperty(value = "农业机械类型")
+    private Integer machineryType;
 
     @ApiModelProperty(value = "农业机械宽度")
     private Double machineryWidth;

@@ -44,9 +44,9 @@ public class MachineryServiceImpl extends ServiceImpl<MachineryDao, Machinery> i
     }
 
     @Override
-    public PageInfo<Map<String,Object>> getListAdmin(Integer page, Integer count) {
+    public PageInfo<Map<String,Object>> getListAdmin(Integer page, Integer count,Integer dictId) {
         PageHelper.startPage(page,count);
-        List<Map<String,Object>> machineryList = machineryDao.getListAdmin();
+        List<Map<String,Object>> machineryList = machineryDao.getListAdmin(dictId);
         PageInfo<Map<String,Object>> pageInfo=new PageInfo<>(machineryList);
         return pageInfo;
     }
@@ -64,9 +64,9 @@ public class MachineryServiceImpl extends ServiceImpl<MachineryDao, Machinery> i
     }
 
     @Override
-    public PageInfo<Map<String, Object>> getListUser(Integer deptId, Integer page, Integer count) {
+    public PageInfo<Map<String, Object>> getListUser(Integer deptId, Integer page, Integer count,Integer dictId) {
         PageHelper.startPage(page,count);
-        List<Map<String,Object>> machineryList = machineryDao.getListUser(deptId);
+        List<Map<String,Object>> machineryList = machineryDao.getListUser(deptId,dictId);
         PageInfo<Map<String,Object>> pageInfo=new PageInfo<>(machineryList);
         return pageInfo;
     }

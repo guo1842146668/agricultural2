@@ -60,19 +60,4 @@ public class Work implements Serializable {
     @ApiModelProperty(value = "确认面积")
     private Double confirmArea;
 
-    @ApiModelProperty(value = "省")
-    private String province;
-
-    @ApiModelProperty(value = "市")
-    private String city;
-
-    @ApiModelProperty(value = "县")
-    private String county;
-
-    @ApiModelProperty(value = "镇")
-    private String town;
-
-    @ApiModelProperty(value = "村")
-    private String village;
-
 }

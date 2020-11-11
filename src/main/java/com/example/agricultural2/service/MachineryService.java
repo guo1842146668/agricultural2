@@ -23,13 +23,13 @@ public interface MachineryService extends IService<Machinery> {
 
     int update(Machinery machinery);
 
-    PageInfo<Map<String,Object>> getListAdmin(Integer page, Integer count);
+    PageInfo<Map<String,Object>> getListAdmin(Integer page, Integer count,Integer dictId);
 
     Map<String,Object> getMachineryIsEmpty(String machineryNo);
 
     int deleteMachinery(Integer machineryID);
 
-    PageInfo<Map<String,Object>> getListUser(Integer deptId,Integer page, Integer count);
+    PageInfo<Map<String,Object>> getListUser(Integer deptId,Integer page, Integer count,Integer dictId);
 
     PageInfo<Map<String,Object>> getVerificationAdmin(Integer page, Integer count);
 

@@ -21,9 +21,9 @@ public interface MachineryDao extends BaseMapper<Machinery> {
 
     int updateStatus(Integer machineryID,Integer machineryStatus);
 
-    List<Map<String,Object>> getListAdmin();
+    List<Map<String,Object>> getListAdmin(Integer dictId);
 
-    List<Map<String,Object>> getListUser(Integer deptId);
+    List<Map<String,Object>> getListUser(Integer deptId,Integer dictId);
 
     Map<String,Object> getMachineryIsEmpty(String machineryNO);
 

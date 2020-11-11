@@ -19,13 +19,13 @@ public interface StatDao {
 
     List<Map<String,Object>> getAllByMachineryID(Integer deptId);
 
-    List<Map<String,Object>> getStatsWookNum(Integer deptId);
+    List<Map<String,Object>> getStatsWookNum(Integer deptId,Integer dictId);
 
-    List<Map<String,Object>> getPastSeven(Integer deptId);
+    List<Map<String,Object>> getPastSeven(Integer deptId,Integer dictId);
 
-    List<Map<String,Object>> getDecember(String time,Integer deptId);
+    List<Map<String,Object>> getDecember(String time,Integer deptId,Integer dictId);
 
-    List<Map<String,Object>> getWorkBycounty(String  county,Integer deptId);
+    List<Map<String,Object>> getWorkBycounty(String  county,Integer deptId,Integer dictId);
 
     List<Map<String,Object>> getWorkByNo(String  machineryNO);
 
@@ -33,5 +33,9 @@ public interface StatDao {
 
     List<Map<String,Object>> getWorkByName(Integer  userID);
 
-    List<Map<String,Object>> getByCounty(Integer deptId);
+    List<Map<String,Object>> getByCounty(Integer deptId,Integer dictId);
+
+    List<Map<String, Object>> longitudeAndLatitude(Integer deptId, Integer dictId);
+
+    List<Map<String, Object>> everyday(Integer deptId,Integer dictId,Integer year,Integer month);
 }

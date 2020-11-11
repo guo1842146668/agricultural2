@@ -27,13 +27,14 @@ public class StatServiceImpl implements IStatService {
 
 
     @Override
-    public PageInfo<Map<String,Object>> getAllByCounty(Integer page, Integer count, Integer checkID, String workStartTime,String workEndTime,Integer deptId) {
+    public PageInfo<Map<String,Object>> getAllByCounty(Integer page, Integer count, Integer checkID, String workStartTime,String workEndTime,Integer deptId,Integer dictId) {
         PageHelper.startPage(page,count);
         HashMap hashMap=new HashMap();
         hashMap.put("checkID",checkID);
         hashMap.put("workStartTime",workStartTime);
         hashMap.put("workEndTime",workEndTime);
         hashMap.put("deptId",deptId);
+        hashMap.put("dictId",dictId);
         List<Map<String, Object>> allByCounty = statDao.getAllByCounty(hashMap);
         if(allByCounty.isEmpty()){
             return null;
@@ -54,26 +55,26 @@ public class StatServiceImpl implements IStatService {
     }
 
     @Override
-    public List<Map<String,Object>> getStatsWookNum(Integer deptId) {
-        return statDao.getStatsWookNum(deptId);
+    public List<Map<String,Object>> getStatsWookNum(Integer deptId,Integer dictId) {
+        return statDao.getStatsWookNum(deptId,dictId);
     }
 
     @Override
-    public List<Map<String,Object>> getPastSeven(Integer deptId) {
-        return statDao.getPastSeven(deptId);
+    public List<Map<String,Object>> getPastSeven(Integer deptId,Integer dictId) {
+        return statDao.getPastSeven(deptId,dictId);
     }
 
     @Override
-    public List<Map<String,Object>> getDecember(String time,Integer deptId) {
+    public List<Map<String,Object>> getDecember(String time,Integer deptId,Integer dictId) {
         if(StrUtil.hasBlank(time)  || time.equals("")){
-            return statDao.getDecember(null,deptId);
+            return statDao.getDecember(null,deptId,dictId);
         }
-        return statDao.getDecember(time,deptId);
+        return statDao.getDecember(time,deptId,dictId);
     }
 
     @Override
-    public List<Map<String,Object>> getWorkBycounty(String county,Integer deptId) {
-        return statDao.getWorkBycounty(county,deptId);
+    public List<Map<String,Object>> getWorkBycounty(String county,Integer deptId,Integer dictId) {
+        return statDao.getWorkBycounty(county,deptId,dictId);
     }
 
     @Override
@@ -92,7 +93,17 @@ public class StatServiceImpl implements IStatService {
     }
 
     @Override
-    public List<Map<String,Object>> getAllByCounty(Integer deptId) {
-        return statDao.getByCounty(deptId);
+    public List<Map<String,Object>> getAllByCounty(Integer deptId,Integer dictId) {
+        return statDao.getByCounty(deptId,dictId);
+    }
+
+    @Override
+    public List<Map<String, Object>> longitudeAndLatitude(Integer deptId, Integer dictId) {
+        return statDao.longitudeAndLatitude(deptId,dictId);
+    }
+
+    @Override
+    public List<Map<String, Object>> everyday(Integer deptId,Integer dictId,Integer year,Integer month) {
+        return statDao.everyday(deptId, dictId,year,month);
     }
 }

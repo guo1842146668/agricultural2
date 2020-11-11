@@ -61,24 +61,21 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
 
     @Override
     public List<User> getListUser(String username, String phone, String status, Integer deptId) {
-        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
-        if(username != null){
-            queryWrapper.eq("username",username);
-        }
-        if(phone !=null){
-            queryWrapper.eq("phone",phone);
-        }
-        if(status != null){
-            queryWrapper.eq("status",status);
-        }
-        if(deptId != null){
-            queryWrapper.eq("dept_id",deptId);
-        }
-        return userMapper.selectList(queryWrapper);
+        return userMapper.getListUser(deptId);
     }
 
     @Override
     public int updateUser(User user) {
         return userMapper.updateById(user);
+    }
+
+    @Override
+    public int delete(Integer userID) {
+        return userMapper.deleteById(userID);
+    }
+
+    @Override
+    public String getDeptName(Integer deptId) {
+        return userMapper.getDeptName(deptId);
     }
 }

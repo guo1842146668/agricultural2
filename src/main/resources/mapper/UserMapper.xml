@@ -2,4 +2,15 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.example.agricultural2.mapper.UserMapper">
 
+    <select id="getListUser" resultType="com.example.agricultural2.entity.User">
+        SELECT user_id,username,password,phone,status,last_login_time,create_time,modify_time,dept_id,type FROM user
+        WHERE dept_id = #{deptId} or dept_id in (SELECT dept_id from dept where parent_id = #{deptId} )
+        or dept_id in (SELECT parent_id from dept where dept_id = #{deptId} )
+    </select>
+    <select id="getDeptName" resultType="java.lang.String">
+        SELECT dept_name from dept where dept_id in
+        (SELECT dept_id FROM user u
+        WHERE u.dept_id = #{deptId} or u.dept_id in (SELECT dept_id from dept where parent_id = #{deptId} )
+        or u.dept_id in (SELECT parent_id from dept where dept_id = #{deptId} ))  and parent_id = 1
+    </select>
 </mapper>

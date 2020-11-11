@@ -12,8 +12,9 @@
     <select id="getListAdmin"  resultType="map">
         SELECT *,(SELECT SUM(confirm_area) from work where machinery.machinery_id = work_machinery_id) as confirm_area,
         (SELECT username FROM user where machinery.machinery_owner = user_id) as username,
-        (SELECT phone FROM user where machinery.machinery_owner = user_id) as phone
-        FROM machinery
+        (SELECT phone FROM user where machinery.machinery_owner = user_id) as phone,
+        (SELECT dict_name FROM dict where machinery.machinery_type = dict_id) as dictName
+        FROM machinery where machinery_type = #{dictId} or machinery_type is null
     </select>
 
 
@@ -36,8 +37,11 @@
     <select id="getListUser" resultType="java.util.Map">
         select *,(SELECT SUM(confirm_area) from work where machinery.machinery_id = work_machinery_id) as confirm_area,
         (SELECT username FROM user where machinery.machinery_owner = user_id) as username,
-        (SELECT phone FROM user where machinery.machinery_owner = user_id) as phone
-        from machinery where machinery_owner in (SELECT user_id from user where dept_id = #{deptId})
+        (SELECT phone FROM user where machinery.machinery_owner = user_id) as phone,
+        (SELECT dict_name FROM dict where machinery.machinery_type = dict_id) as dictName
+        from machinery where (machinery_owner in (SELECT user_id from user where dept_id = #{deptId})
+        or machinery_owner in (SELECT user_id from user where dept_id in (SELECT parent_id from dept where dept_id = #{deptId} )))
+        and machinery_type = #{dictId} or machinery_type is null
     </select>
     <select id="getVerificationAdmin" resultType="java.util.Map">
         SELECT DISTINCT* from machinery

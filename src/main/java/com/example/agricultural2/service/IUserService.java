@@ -53,4 +53,13 @@ public interface IUserService extends IService<User> {
      * @return 修改结果
      */
     int updateUser(User user);
+
+    /**
+     * 删除用户
+     * @param userID 用户id
+     * @return
+     */
+    int delete(Integer userID);
+
+    String getDeptName(Integer deptId);
 }

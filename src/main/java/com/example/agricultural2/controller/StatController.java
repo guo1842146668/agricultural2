@@ -44,8 +44,8 @@ public class StatController {
     @ResponseBody
     public Result getAllByCounty(@RequestParam(value = "page",defaultValue = "1") Integer page,
                                  @RequestParam(value = "count",defaultValue = "10") Integer count,
-                                 Integer checkID, String workStartTime, String workEndTime, Integer deptId){
-        return ResultUtil.seccess(statService.getAllByCounty(page, count,checkID,workStartTime,workEndTime,deptId));
+                                 Integer checkID, String workStartTime, String workEndTime, Integer deptId,Integer dictId){
+        return ResultUtil.seccess(statService.getAllByCounty(page, count,checkID,workStartTime,workEndTime,deptId,dictId));
     }
 
     /**
@@ -73,14 +73,15 @@ public class StatController {
      * @Author guoyangyang
      * @Description  统计所有/昨天/今天/ 的农机数，与作业面积
      * @Date  2020/7/24 11:22
-     * @Param
+     * @Param deptId   分组ID
+     * @Param dictId   机械分类ID
      * @return * @return: com.puyan.shengren.agricultural.common.Result
      **/
     @ApiOperation(value="统计所有/昨天/今天/ 的农机数，与作业面积", notes="统计接口")
     @GetMapping("/getStatsWookNum")
     @ResponseBody
-    public Result getStatsWookNum(Integer deptId) {
-        return ResultUtil.seccess(statService.getStatsWookNum(deptId));
+    public Result getStatsWookNum(Integer deptId,Integer dictId) {
+        return ResultUtil.seccess(statService.getStatsWookNum(deptId,dictId));
     }
 
     /**
@@ -93,8 +94,8 @@ public class StatController {
     @ApiOperation(value="统计过去7天的作业面积", notes="统计过去7天的作业面积接口")
     @GetMapping("/getPastSeven")
     @ResponseBody
-    public Result getPastSeven(Integer deptId) {
-        return ResultUtil.seccess(statService.getPastSeven(deptId));
+    public Result getPastSeven(Integer deptId,Integer dictId) {
+        return ResultUtil.seccess(statService.getPastSeven(deptId,dictId));
     }
 
 
@@ -108,13 +109,13 @@ public class StatController {
     @ApiOperation(value="统计过去12个月的作业面积", notes="统计过去12个月的作业面积接口")
     @GetMapping("/getDecember")
     @ResponseBody
-    public Result getDecember(String time,Integer deptId) {
-        return ResultUtil.seccess(statService.getDecember(time,deptId));
+    public Result getDecember(String time,Integer deptId,Integer dictId) {
+        return ResultUtil.seccess(statService.getDecember(time,deptId,dictId));
     }
 
     @GetMapping("/getWorkBycounty")
-    public Result getWorkBycounty(String county,Integer deptId){
-        return ResultUtil.seccess(statService.getWorkBycounty(county,deptId));
+    public Result getWorkBycounty(String county,Integer deptId,Integer dictId){
+        return ResultUtil.seccess(statService.getWorkBycounty(county,deptId,dictId));
     }
 
     @GetMapping("/getWorkByNo")
@@ -135,7 +136,33 @@ public class StatController {
     @ApiOperation(value="县/区统计", notes="县/区统计接口")
     @GetMapping("/getByCounty")
     @ResponseBody
-    public Result getByCounty(Integer deptId){
-        return ResultUtil.seccess(statService.getAllByCounty(deptId));
+    public Result getByCounty(Integer deptId,Integer dictId){
+        return ResultUtil.seccess(statService.getAllByCounty(deptId,dictId));
+    }
+
+    /**
+     * 获取当前用户下当前分类的机械的经纬度位置
+     * @param deptId 分组的ID
+     * @param dictId  分类的ID
+     * @return
+     */
+    @GetMapping("/longitudeAndLatitude")
+    @ResponseBody
+    public Result longitudeAndLatitude(Integer deptId,Integer dictId){
+        return ResultUtil.seccess(statService.longitudeAndLatitude(deptId,dictId));
+    }
+
+    /**
+     *  通过年月获取这个月每日的作业面积总和
+     * @param deptId  分组的ID
+     * @param dictId  分类的ID
+     * @param year    年份
+     * @param month   月份
+     * @return
+     */
+    @GetMapping("/everyday")
+    @ResponseBody
+    public Result everyday(Integer deptId,Integer dictId,Integer year,Integer month){
+        return ResultUtil.seccess(statService.everyday(deptId,dictId,year,month));
     }
 }

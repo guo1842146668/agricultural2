@@ -63,8 +63,10 @@ public class UserController {
         map.put("user",login);
         if(login.getType() == 1){
             map.put("menu",iMenuService.getList());
+            map.put("companyName",null);
         }else{
             map.put("menu",iMenuService.getListDept(login.getDeptId()));
+            map.put("companyName",iUserService.getDeptName(login.getDeptId()));
         }
         return  ResultUtil.seccess(map);
     }
@@ -89,7 +91,6 @@ public class UserController {
             listAdmin = iUserService.getListAdmin(username, phone, status);
         }else{
             listAdmin = iUserService.getListUser(username, phone, status, user.getDeptId());
-
         }
         PageInfo<User> pageInfo=new PageInfo<>(listAdmin);
         return ResultUtil.seccess(pageInfo);
@@ -136,6 +137,9 @@ public class UserController {
      */
     @PostMapping("/update")
     public Result update(User user){
+        if(user.getPassword() != null){
+            user.setPassword(SecureUtil.md5(user.getPassword()));
+        }
         return ResultUtil.seccess(iUserService.updateUser(user));
     }
 
@@ -192,5 +196,15 @@ public class UserController {
     @ResponseBody
     public Result getFunctionByUserID(Integer userID){
         return ResultUtil.seccess(iMenuService.getListDept(userID));
+    }
+
+
+    @DeleteMapping("/delete")
+    @ResponseBody
+    public Result deleteUser(Integer userID){
+        if(userID == 1){
+            return  ResultUtil.error(400,"超级管理员不能删除");
+        }
+        return ResultUtil.seccess(iUserService.delete(userID));
     }
 }

@@ -101,14 +101,17 @@ public class MachineryController {
     @ResponseBody
     public Result getAll(@RequestParam(value = "page",defaultValue = "1") Integer page,
                          @RequestParam(value = "count",defaultValue = "10") Integer count,
-                         HttpServletRequest request){
+                         HttpServletRequest request,Integer dictId){
         String token = request.getHeader("token");
         Map<String, Object> map = JavaWebToken.parserJavaWebToken(token);
         User user = JavaWebToken.TokenConvertUser(map);
+        if(dictId == null){
+            return  ResultUtil.error(500,"dictId不能为null");
+        }
         if(user.getType() == 1){
-            return ResultUtil.seccess(machineryService.getListAdmin(page, count));
+            return ResultUtil.seccess(machineryService.getListAdmin(page, count,dictId));
         }else{
-            return ResultUtil.seccess(machineryService.getListUser(user.getDeptId(),page,count));
+            return ResultUtil.seccess(machineryService.getListUser(user.getDeptId(),page,count,dictId));
         }
 
     }
@@ -160,4 +163,5 @@ public class MachineryController {
         }
 
     }
+
 }

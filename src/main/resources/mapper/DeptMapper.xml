@@ -13,6 +13,7 @@
        (SELECT parent_id FROM dept WHERE dept_id = #{deptId}) or
        dept_id = (SELECT parent_id FROM dept WHERE dept_id = #{deptId}) or
        dept_id = (SELECT parent_id FROM dept WHERE dept_id = (SELECT parent_id FROM dept WHERE dept_id = #{deptId}))
+       or parent_id = #{deptId}
     </select>
     <select id="getDeptMenu" resultType="java.util.Map">
         select  * from dept_menu where dept_id = #{deptId}
