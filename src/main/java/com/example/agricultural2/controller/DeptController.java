@@ -8,7 +8,6 @@ import com.example.agricultural2.entity.User;
 import com.example.agricultural2.service.IDeptService;
 import com.example.agricultural2.tool.ClassIsNull;
 import com.example.agricultural2.tool.JavaWebToken;
-import org.apache.ibatis.annotations.Param;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;

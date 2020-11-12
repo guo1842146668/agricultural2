@@ -3,12 +3,17 @@ package com.example.agricultural2.netty;
 import cn.hutool.cache.CacheUtil;
 import cn.hutool.cache.impl.TimedCache;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.json.JSON;
+import cn.hutool.json.JSONObject;
+import cn.hutool.json.JSONUtil;
+import cn.hutool.json.XML;
 import com.example.agricultural2.entity.Machinery;
 import com.example.agricultural2.entity.Work;
 import com.example.agricultural2.service.WorkService;
 import com.example.agricultural2.service.impl.MachineryServiceImpl;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import org.springframework.web.client.RestTemplate;
 
 import java.math.BigInteger;
 import java.util.Date;
@@ -49,29 +54,29 @@ public class ServerHandler extends SimpleChannelInboundHandler<String> {
         // 收到消息直接打印输出
         System.err.println(DateUtil.now() + ":" + ctx.channel().remoteAddress().toString().split(":")[0] + " Say : " + msg);
         //跟踪器ID
-        String trackerID = null;
+        String trackerID;
         //命令
-        String command = null;
+        String command;
         // 返回客户端消息 - 我已经接收到了你的消息
 
         if(msg.length() > 16){
             trackerID = msg.substring(1,13);
             command = msg.substring(13,17);
-            if(command.equals("BP05")){
+            if("BP05".equals(command)){
                 //回复注册设备
                 ctx.writeAndFlush("("+trackerID+"AP05)");
                 IMEI.put(trackerID,msg.substring(17,32));
                 //BR00 发送实时位置信息
-            }else if(command.equals("BR00") || command.equals("BR01")){
+            }else if("BR00".equals(command) || "BR01".equals(command)){
                 String  IOStatus = msg.substring(62,67);
                 //开始工作
-                if(IOStatus.equals("01100")){
+                if("01100".equals(IOStatus)){
                     Map<String, Object> map = terminalRegistration(msg);
                     Map<String, Object> machineryIsEmpty = machineryService.getMachineryIsEmpty(trackerID);
                     //创建一条工作信息
                     if(IO_OPEN == null || IO_OPEN.get(trackerID) == null){
                         //判断是否存在这个设备
-                        if(machineryIsEmpty == null || machineryIsEmpty.get("machinery_id") == null || machineryIsEmpty.get("machinery_id").equals("")){
+                        if(machineryIsEmpty == null || machineryIsEmpty.get("machinery_id") == null || "".equals(machineryIsEmpty.get("machinery_id"))){
                             //不存在添加一个设备信息
                             Machinery machinery = new Machinery();
                             machinery.setMachineryNo(trackerID);
@@ -81,7 +86,7 @@ public class ServerHandler extends SimpleChannelInboundHandler<String> {
                             Work work = new Work();
                             work.setWorkMachineryId(machinery.getMachineryId());
                             work.setWorkStartTime(new Date());
-                            work.setWorkStartMap(map.get("latitude").toString()+","+map.get("longitude").toString());
+                            work.setWorkStartMap(map.get("work_map").toString());
                             work.setDrivenDistance(Double.valueOf(map.get("mileage").toString()));
                             work.setWorkArea(0.00);
                             work.setWorkDepth(0.00);
@@ -92,7 +97,7 @@ public class ServerHandler extends SimpleChannelInboundHandler<String> {
                             Work work = new Work();
                             work.setWorkMachineryId(Integer.parseInt(machineryIsEmpty.get("machinery_id").toString()));
                             work.setWorkStartTime(new Date());
-                            work.setWorkStartMap(map.get("latitude").toString()+","+map.get("longitude").toString());
+                            work.setWorkStartMap(map.get("work_map").toString());
                             work.setDrivenDistance(Double.valueOf(map.get("mileage").toString()));
                             work.setWorkArea(0.00);
                             work.setWorkDepth(0.00);
@@ -104,21 +109,21 @@ public class ServerHandler extends SimpleChannelInboundHandler<String> {
                         //累加里程信息
                         Integer workID = IO_OPEN.get(trackerID);
                         Work workById = workService.getById(workID);
-                        workById.setWorkLength(workById.getWorkLength()+(Double.valueOf(map.get("mileage").toString())-workById.getDrivenDistance()));
+                        workById.setWorkLength(workById.getWorkLength()+(Double.parseDouble(map.get("mileage").toString())-workById.getDrivenDistance()));
                         workById.setDrivenDistance(Double.valueOf(map.get("mileage").toString()));
                         workById.setWorkArea(workById.getWorkLength()*Double.parseDouble(machineryIsEmpty.get("machinery_width").toString()));
                         workService.update(workById);
                     }
-                }else if(IOStatus.equals("00100")){
+                }else if("00100".equals(IOStatus)){
                     //结束工作
                     if(IO_OPEN.get(trackerID) != null){
                         Map<String, Object> map = terminalRegistration(msg);
                         Map<String, Object> machineryIsEmpty = machineryService.getMachineryIsEmpty(trackerID);
                         Integer workID = IO_OPEN.get(trackerID);
                         Work workById = workService.getById(workID);
-                        workById.setWorkLength(workById.getWorkLength()+(Double.valueOf(map.get("mileage").toString())-workById.getDrivenDistance()));
+                        workById.setWorkLength(workById.getWorkLength()+(Double.parseDouble(map.get("mileage").toString())-workById.getDrivenDistance()));
                         workById.setWorkArea(workById.getWorkLength()*Double.parseDouble(machineryIsEmpty.get("machinery_width").toString()));
-                        workById.setWorkEndMap(map.get("latitude").toString()+","+map.get("longitude").toString());
+                        workById.setWorkEndMap(map.get("work_map").toString());
                         workById.setWorkEndTime(new Date());
                         workService.update(workById);
                     }
@@ -182,11 +187,17 @@ public class ServerHandler extends SimpleChannelInboundHandler<String> {
       /*  String imei = msg.substring(17, 32);
         map.put("imei",imei);*/
         //纬度
-        String latitude = msg.substring(24, 33);
-        map.put("latitude",latitude);
+        String latitudeGPS = msg.substring(24, 33);
+        double latitude =Double.parseDouble(latitudeGPS.substring(0,latitudeGPS.indexOf(".")-2))+Double.parseDouble(latitudeGPS.substring(latitudeGPS.indexOf(".")-2))/60;
         //经度
-        String longitude = msg.substring(34, 44);
-        map.put("longitude",longitude);
+        String longitudeGPS = msg.substring(34, 44);
+        double longitude =Double.parseDouble(longitudeGPS.substring(0,longitudeGPS.indexOf(".")-2))+Double.parseDouble(longitudeGPS.substring(longitudeGPS.indexOf(".")-2))/60;
+        RestTemplate restTemplate = new RestTemplate();
+        String forObject = restTemplate.getForObject("http://restapi.amap.com/v3/assistant/coordinate/convert?locations=" + longitude + "," + latitude + "&coordsys=gps&output=xml&key=b1e7d4a485aa5e9af28f2ba8a2a28eee", String.class);
+        JSONObject jsonObject = XML.toJSONObject(forObject);
+        Object response = jsonObject.get("response");
+        JSON parse = JSONUtil.parse(response);
+        map.put("work_map",parse.getByPath("locations"));
         //里程数
         Integer mileage = Integer.parseInt(msg.substring(msg.indexOf("L")+1,msg.indexOf("L")+9),16);
         map.put("mileage",mileage);
@@ -223,7 +234,7 @@ public class ServerHandler extends SimpleChannelInboundHandler<String> {
     /**
      * 补零
      *
-     * @return
+     * @return 补0结果
      */
     public static String zeroPadding(String msg) {
         StringBuilder sb = new StringBuilder();
